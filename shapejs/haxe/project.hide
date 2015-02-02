@@ -1,0 +1,62 @@
+{
+     "type" : 2
+    ,"target" : 3
+    ,"name" : "Shape"
+    ,"main" : "php.hxml"
+    ,"projectPackage" : "shape"
+    ,"company" : ""
+    ,"license" : ""
+    ,"url" : ""
+    ,"targetData" : [
+         {
+             "pathToHxml" : "flash.hxml"
+            ,"runActionType" : 1
+            ,"runActionText" : "bin/Shape.swf"
+        }
+        ,{
+             "pathToHxml" : "javascript.hxml"
+            ,"runActionType" : 1
+            ,"runActionText" : "bin/index.html"
+        }
+        ,{
+             "pathToHxml" : "neko.hxml"
+            ,"runActionType" : 2
+            ,"runActionText" : "neko bin/Shape.n"
+        }
+        ,{
+             "pathToHxml" : "php.hxml"
+            ,"runActionType" : 0
+        }
+        ,{
+             "pathToHxml" : "cpp.hxml"
+            ,"runActionType" : 2
+            ,"runActionText" : "bin/Shape.exe"
+        }
+        ,{
+             "pathToHxml" : "java.hxml"
+        }
+        ,{
+             "pathToHxml" : "csharp.hxml"
+        }
+        ,{
+             "pathToHxml" : "python.hxml"
+            ,"runActionType" : 2
+            ,"runActionText" : "python bin/Shape.py"
+        }
+    ]
+    ,"files" : [
+         "Shape.hx"
+        ,"php.hxml"
+        ,"javascript.hxml"
+        ,"Main.hx"
+    ]
+    ,"activeFile" : "Main.hx"
+    ,"openFLTarget" : null
+    ,"runActionType" : null
+    ,"runActionText" : null
+    ,"buildActionCommand" : null
+    ,"hiddenItems" : [
+
+    ]
+    ,"showHiddenItems" : false
+}

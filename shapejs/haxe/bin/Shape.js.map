@@ -1,0 +1,9 @@
+{
+"version":3,
+"file":"Shape.js",
+"sourceRoot":"file://",
+"sources":["/Users/andrevanzuydam/projects/shapejs/src/Shape.hx"],
+"sourcesContent":["package ;\n\n/**\n* @author \n */\n\nclass Shape\n{\n  var closingtag:String = \"\";\n  var  openingtag:String = \"\";  \n    \n  function new() {\n    trace(\"Hello World\");\n    this.openingtag = \"123\";\n    this.closingtag = \"345\";  \n  }\t\n  \n  function toString() : String {\n    return \"<H1>Hello World</H1>\"+this.openingtag;  \n  }  \n    \n  static public function main(): Void {\n    trace (\"Shape class declared\");   \n    trace (new Shape());  \n  }  \n    \n}\n\n\n\n\n"],
+"names":[],
+"mappings":";QAWC,GALF;CAG2B,AAH3B,EAG2B;CADD,AAF1B,EAE0B;CAItB,WAAM;CACN,EAAkB;CAClB,EAAkB;;aAON,FAAsB;CAClC,WAAO;CACP,WAAO;;;;;"
+}
