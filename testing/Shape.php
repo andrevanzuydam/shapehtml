@@ -1,7 +1,5 @@
 <?php
-/**
- * The basic shape element class to handle inheritance
- */
+
 class shapeBaseElement {
 
     private $id;
@@ -58,9 +56,7 @@ class shapeBaseElement {
     }
 
 }
-/**
- * The htmlElement class which handles the HTML compilation etc
- */
+
 class htmlElement extends shapeBaseElement {
 
     private $openingTag = "";
@@ -97,19 +93,10 @@ class htmlElement extends shapeBaseElement {
 
                 if (is_object($content) && get_class($content) === "shapeBaseElement") {
                     if (is_object($content->getValue()) && get_class($content->getValue()) === "htmlElement") {
+
                         $html .= $content->getValue()->compileHTML();
                     } else {
-                        
-                        if (is_array($content->getValue())) {
-                          foreach ($content->getValue() as $ccid => $ccontent) {
-                              if (is_object($ccontent) && get_class($ccontent) === "htmlElement") {
-                                $html .= $ccontent->compileHTML();
-                              }
-                         }                           
-                        }
-                          else {
-                           $html .= $content->getValue();
-                          } 
+                        $html .= $content->getValue();
                     }
                 }
             }
@@ -199,9 +186,8 @@ class htmlElement extends shapeBaseElement {
                 $element->content[$cid] = clone $content;
 
                 if (is_object($content) && get_class($content) === "shapeBaseElement") {
-                   
+                    $this->cloneChildren($element->content[$cid]);
                     if (is_object($element->content[$cid]->getValue()) && get_class($element->content[$cid]->getValue()) == "htmlElement") {
-                        
                         $element->content[$cid]->setValue(clone $element->content[$cid]->getValue());
                         $this->cloneChildren($element->content[$cid]->getValue());
                     }
@@ -210,30 +196,21 @@ class htmlElement extends shapeBaseElement {
         }
     }
 
+    function updateInherited ($elements = null) {
+       if (!empty($elements)) { 
+         foreach ($elements as $eid => $element) {
+            $element->setValue ($GLOBALS["shapeElements"][$element->getParent()]->getValue()); 
+         } 
+       }
+       
+    }
+    
     /**
      * Setting Content
      * @param type $value
      */
     function setContent($value) {
-        if (count($this->content) == 1) {
-          $this->content[0]->setValue($value);  
-          if (!empty($this->content[0]->getParent())) {
-            
-            $this->content[0]->setParent();  
-          }
-        }
-          else {
-          
-          $content = new shapeBaseElement("content", $value);    
-          $this->content = [$content];
-          //find all the children of this element and add the attribute
-          foreach ($GLOBALS["shapeElements"] as $eid => $element) {
-             if ($element->getParent() === $this->getId()) {
-                 $element->cloneContent($content);
-             }
-          }
-          
-        }
+        $this->content = [new shapeBaseElement("content", $value)];
         $this->setInherited();
     }
 
@@ -254,98 +231,54 @@ class htmlElement extends shapeBaseElement {
     }
 
     /**
-     * BySearch - internal function to find elements
-     */
-    function bySearch ($keyName, $keyIndex="id") {
-        $result = null;
-        if (!empty($this->attributes)) {
-            foreach ($this->attributes as $aid => $attribute) {
-                if (strtoupper($attribute->getKey()) === strtoupper("id") && $attribute->getValue() === $keyName) {
-                    $result = $this;
-                }
-            }
-        }
-        
-        if (empty($result)) {
-            if (!empty($this->content)) {
-                foreach ($this->content as $cid => $content) {
-                if (is_object($content) && get_class($content) === "shapeBaseElement") {
-                        if (is_object($this->content[$cid]->getValue()) && get_class($this->content[$cid]->getValue()) == "htmlElement") {
-                            $result = $this->content[$cid]->getValue()->byId($keyName);
-                            if (!empty($result)) {
-                               break;  
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return $result;
-    }
-    
-    /**
      * Find and Element by Its HTML Id
      * Example: p(["id" => "Test"])
      * @param type $keyName
      * @return \htmlElement
      */
     function byId($keyName) {
-       return $this->bySearch($keyName, "id"); 
-    }
-    
-    /**
-     * Find and Element by Its HTML Id
-     * Example: p(["clas" => "Test"])
-     * @param type $keyName
-     * @return \htmlElement
-     */
-    function byClass($keyName) {
-       return $this->bySearch($keyName, "class"); 
+        if (!empty($this->attributes)) {
+            foreach ($this->attributes as $aid => $attribute) {
+                if (strtoupper($attribute->getKey()) === strtoupper("id") && $attribute->getValue() === $keyName) {
+                    return $this;
+                }
+            }
+        }
+
+        if (!empty($this->content)) {
+            foreach ($this->content as $cid => $content) {
+                if (is_object($content) && get_class($content) === "shapeBaseElement") {
+                    if (is_object($this->content[$cid]->getValue()) && get_class($this->content[$cid]->getValue()) == "htmlElement") {
+                        return $this->content[$cid]->getValue()->byId($keyName);
+                    }
+                }
+            }
+        }
     }
 
+    /**
+     * Merge content may need some work
+     * @param type $contents
+     */
+    function mergeContent($contents) {
+       foreach ($contents as $cid => $content) {
+         if ($this->content[$cid]->getParent() === $content->getId() ) {  
+           $this->content[$cid]->setValue($content->getValue());    
+         }
+       }
+    }
+    
+    
     /**
      * Set inherited properties
      */
     function setInherited() {
-            if (!empty($this->attributes)) {
-                foreach ($this->attributes as $cid => $attribute) {
-                    if (is_object($attribute) && get_class($attribute) === "shapeBaseElement") {
-                        //update all the children to have my value
-                        foreach ($GLOBALS["shapeElements"] as $sid => $element) {
-                           if ($element->getParent() === $attribute->getId()) {
-                               $element->setValue (  $attribute->getValue());
-                           }  
-                        }
-                    }    
-                }
+        foreach ($GLOBALS["shapeElements"] as $cid => $element) {
+            if ($element->getParent() === $this->getId()) {
+               $this->updateInherited($element->attributes);
+               $GLOBALS["shapeElements"][$cid]->mergeContent ($this->content);
             }
-            
-            if (!empty($this->content)) {
-                foreach ($this->content as $cid => $content) {
-                    if (is_object($content) && get_class($content) === "shapeBaseElement") {
-                        //update all the children to have my value
-                        foreach ($GLOBALS["shapeElements"] as $sid => $element) {
-                           if ($element->getParent() === $content->getId()) {
-                             if (is_object($element) && get_class($element) == "shapeBaseElement") {
-                                 if (is_object($element->getValue()) && get_class($element->getValue()) === "htmlElement") {
-                                   $this->content[$cid]->getValue()->setInherited();
-                                 }
-                                   else {
-                                     $element->setValue (  $content->getValue());
-                                   }
-                               }
-                           }  
-                        }
-                        
-                        if (is_object($this->content[$cid]->getValue()) && get_class($this->content[$cid]->getValue()) === "htmlElement") {
-                            if ($element->getParent() === $content->getId()) {
-                              
-                            }
-                        }
-                    }
-                }
-            }
-      
+        }
     }
     
     /**
@@ -390,14 +323,7 @@ class htmlElement extends shapeBaseElement {
     function cloneAttribute ($attribute) {
        $this->attributes[] = clone $attribute; 
     }
-
-    /**
-     * Clones content  
-     * @param type $content
-     */    
-    function cloneContent ($content) {
-       $this->content[] = clone $content; 
-    }
+    
     /**
      * Add Attributes to the Element
      * @param type $keyName
